@@ -405,3 +405,21 @@ export const evaluateDiscounts = async (payload: {
     }>;
   };
 };
+
+// ================= TRANSPORT =================
+export const bookTransport = async (payload: {
+  booking_id: string;
+  event_id: string;
+  pickup_address: string;
+  drop_address: string;
+  vehicle_type: "BIKE" | "CAR" | "VAN";
+  notes?: string;
+}) => {
+  const res = await api.post('/transport/book', payload);
+  return res;
+};
+
+export const getMyTransportBookings = async () => {
+  const res = await api.get('/transport/my');
+  return res.data;
+};

@@ -3,11 +3,12 @@ import {
   Calendar, Clock, MapPin, Users, Tag, Info, Heart, ChevronUp, ChevronDown, CheckCircle, Share2, Link2, CheckCheck, BadgePercent, X, Loader2, Video, Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import api from "../services/api";
+import api, { bookTransport } from "../services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { getMyWishlist, addToWishlist, removeFromWishlist } from "../services/api";
 import VideoPlayer from "../components/VideoPlayer";
+import TransportSelector from "../components/TransportSelector";
 
 declare global {
   interface Window {
@@ -86,11 +87,17 @@ export default function EventDetail() {
   const [addons, setAddons] = useState<any[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<Record<string, number>>({});
 
-  // ── Discount state ────────────────────────────────────────────────────────
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; type: string; value: number; message: string } | null>(null);
   const [discountError, setDiscountError] = useState<string | null>(null);
   const [discountLoading, setDiscountLoading] = useState(false);
+
+  // ── Transport state ────────────────────────────────────────────────────────
+  const [transportInfo, setTransportInfo] = useState<{
+    option: { vehicle_type: "BIKE" | "CAR" | "VAN"; distance_km: number; fare: number; currency: string } | null;
+    pickup: string;
+    drop: string;
+  }>({ option: null, pickup: '', drop: '' });
 
   const { user } = useAuth();
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -191,6 +198,22 @@ export default function EventDetail() {
       });
       const bookingId = bookingRes.data.booking_id;
 
+      // ── Book transport if selected ──
+      if (transportInfo.option) {
+        try {
+           await bookTransport({
+             booking_id: bookingId,
+             event_id: String(event!.id),
+             pickup_address: transportInfo.pickup,
+             drop_address: transportInfo.drop,
+             vehicle_type: transportInfo.option.vehicle_type
+           });
+        } catch (tError) {
+           console.error("Failed to book transport", tError);
+           toast.error("Booking succeeded but transport failed.");
+        }
+      }
+
       if (totalPrice === 0) {
         toast.success("Payment successful! Ticket sent to your email.");
         navigate('/my-bookings');
@@ -200,7 +223,8 @@ export default function EventDetail() {
         const options: RazorpayOptions = {
           key, amount, currency: "INR",
           name: "Event Organizer",
-          description: `${event!.title}${addonPayload.length > 0 ? ' + Add-ons' : ''}`,
+          // Update description for razorpay to include transport notation if requested
+          description: `${event!.title}${addonPayload.length > 0 ? ' + Add-ons' : ''}${transportInfo.option ? ' + Transport' : ''}`,
           order_id,
           handler: async (response) => {
             await api.post("/payments/verify", {
@@ -252,7 +276,8 @@ export default function EventDetail() {
       ? Math.round(basePrice * appliedDiscount.value / 100)
       : Math.min(appliedDiscount.value, basePrice)
     : 0;
-  const totalPrice = Math.max(0, basePrice + addonsPrice - discountAmount);
+  const transportPrice = transportInfo.option?.fare || 0;
+  const totalPrice = Math.max(0, basePrice + addonsPrice - discountAmount) + transportPrice;
 
   if (loading) {
     return (
@@ -642,6 +667,12 @@ export default function EventDetail() {
                       <span className="text-[var(--text-primary)]">₹{addonsPrice}</span>
                     </div>
                   )}
+                  {transportPrice > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-[var(--text-secondary)]">Transport ({transportInfo.option?.vehicle_type})</span>
+                      <span className="text-[var(--text-primary)]">₹{transportPrice}</span>
+                    </div>
+                  )}
                   {appliedDiscount && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-emerald-500 flex items-center gap-1">
@@ -707,6 +738,16 @@ export default function EventDetail() {
                     </button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Transport Section */}
+            {selectedTicket && (
+              <div className="mb-6">
+                 <TransportSelector
+                    eventVenue={`${event.venue}, ${event.city}`}
+                    onSelect={(option, pickup, drop) => setTransportInfo({ option, pickup, drop })}
+                 />
               </div>
             )}
 
