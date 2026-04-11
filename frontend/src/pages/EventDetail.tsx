@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Calendar, Clock, MapPin, Users, Tag, Info, Heart, ChevronUp, ChevronDown, CheckCircle, Share2, Link2, CheckCheck, BadgePercent, X, Loader2, Video, Zap
+  Calendar, Clock, MapPin, Users, Tag, Info, Heart, ChevronUp, ChevronDown, CheckCircle, Share2, Link2, CheckCheck, BadgePercent, X, Loader2, Video, Zap, Target, Globe
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import api, { bookTransport } from "../services/api";
@@ -99,20 +99,31 @@ export default function EventDetail() {
     drop: string;
   }>({ option: null, pickup: '', drop: '' });
 
+  // ── Sponsor state ────────────────────────────────────────────────────────
+  const [sponsorPkgs, setSponsorPkgs] = useState<any[]>([]);
+  const [sponsors, setSponsors] = useState<any[]>([]);
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [selectedSponsorPkg, setSelectedSponsorPkg] = useState<any>(null);
+  const [sponsorForm, setSponsorForm] = useState({ company_name: '', contact_email: '', website_url: '', logo_url: '' });
+
   const { user } = useAuth();
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [eventRes, ticketRes, addonRes] = await Promise.all([
+        const [eventRes, ticketRes, addonRes, pkgRes, spnRes] = await Promise.all([
           api.get(`/events/${id}`),
           api.get(`/tickets/event/${id}`),
           api.get(`/events/${id}/addons`),
+          api.get(`/sponsors/events/${id}/packages`).catch(() => ({ data: [] })),
+          api.get(`/sponsors/events/${id}/sponsors`).catch(() => ({ data: [] })),
         ]);
         setEvent(eventRes.data);
         setTickets(ticketRes.data);
         setAddons(addonRes.data);
+        setSponsorPkgs(pkgRes.data);
+        setSponsors(spnRes.data);
       } catch {
         setError("Failed to load event");
       } finally {
@@ -307,6 +318,36 @@ export default function EventDetail() {
   const totalAttending = tickets.reduce((a, b) => a + b.sold, 0);
   const isPastEvent = new Date(event.start_date) < new Date();
 
+  const handleSponsorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Please login to register as a sponsor");
+      return;
+    }
+    if (!selectedSponsorPkg) return;
+    try {
+      setProcessing(true);
+      await api.post('/sponsors/register', {
+        package_id: selectedSponsorPkg._id,
+        company_name: sponsorForm.company_name,
+        contact_email: sponsorForm.contact_email,
+        website_url: sponsorForm.website_url || undefined,
+        logo_url: sponsorForm.logo_url || undefined,
+      });
+      toast.success("Sponsorship application submitted successfully!");
+      setShowSponsorModal(false);
+      setSelectedSponsorPkg(null);
+      setSponsorForm({ company_name: '', contact_email: '', website_url: '', logo_url: '' });
+      // reload packages to update available slots potentially
+      const pkgRes = await api.get(`/sponsors/events/${id}/packages`);
+      setSponsorPkgs(pkgRes.data);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to submit sponsorship.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* Hero Banner */}
@@ -472,6 +513,34 @@ export default function EventDetail() {
                       </div>
                     );
                   })}
+              </div>
+            </div>
+          )}
+
+          {/* ── Our Sponsors Section ──────────────────────────────────── */}
+          {sponsors.length > 0 && (
+            <div className="glass-card rounded-2xl p-6 animate-fade-up delay-200" style={{ animationFillMode: 'both' }}>
+              <div className="flex items-center gap-2 mb-6">
+                <Target className="w-5 h-5 text-amber-500" />
+                <h2 className="font-heading font-bold text-[var(--text-primary)] text-xl">Our Sponsors</h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {sponsors.map(s => (
+                  <div key={s._id} className="flex flex-col items-center p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+                    {s.logo_url ? (
+                      <img src={s.logo_url} alt={s.company_name} className="h-12 object-contain mb-3" />
+                    ) : (
+                      <div className="h-12 w-full flex items-center justify-center text-xs text-slate-500 mb-3 bg-black/20 rounded">No Logo</div>
+                    )}
+                    <span className="text-sm font-bold text-white text-center">{s.company_name}</span>
+                    <span className="text-[10px] uppercase text-amber-400 mt-1">{s.package_name}</span>
+                    {s.website_url && (
+                      <a href={s.website_url} target="_blank" rel="noreferrer" className="text-xs text-brand-400 mt-2 flex items-center gap-1 hover:underline">
+                        <Globe className="w-3 h-3" /> Visit
+                      </a>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -769,13 +838,85 @@ export default function EventDetail() {
             </button>
 
             {/* Info */}
-            <div className="mt-4 flex items-start gap-2 text-xs text-slate-500">
+            <div className="mt-4 flex items-start gap-2 text-xs text-slate-500 mb-6">
               <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-brand-400" />
               <span>Tickets will be sent to your email after successful payment.</span>
             </div>
+
+            {/* Sponsor CTA */}
+            {sponsorPkgs.length > 0 && !isPastEvent && (
+              <div className="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 mt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-amber-500 flex items-center gap-2"><Target className="w-4 h-4"/> Become a Sponsor</h4>
+                </div>
+                <p className="text-xs text-slate-400 mb-4">Promote your brand at {event.title}. Multiple tier levels available.</p>
+                <button onClick={() => setShowSponsorModal(true)} className="w-full py-2.5 rounded-xl text-sm font-bold bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 transition border border-amber-500/30">
+                  View Packages
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div >
+
+      {/* Sponsor Application Modal */}
+      {showSponsorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--bg-primary)] border border-white/10 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto flex flex-col p-6 relative">
+            <button onClick={() => setShowSponsorModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-white"><X className="w-5 h-5"/></button>
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Target className="w-6 h-6 text-amber-500"/> Sponsorship Packages</h2>
+            
+            <div className="space-y-4 mb-6">
+              {sponsorPkgs.map(pkg => {
+                const isSelected = selectedSponsorPkg?._id === pkg._id;
+                const isAvailable = pkg.sold_slots < pkg.available_slots;
+                return (
+                  <div key={pkg._id} onClick={() => isAvailable && setSelectedSponsorPkg(pkg)} className={`p-4 rounded-xl border cursor-pointer transition-all ${isSelected ? "border-amber-500 bg-amber-500/10" : "border-white/10 hover:border-amber-500/30"} ${!isAvailable ? "opacity-50 cursor-not-allowed" : ""}`}>
+                    <div className="flex justify-between items-start mb-2">
+                       <h3 className="font-bold text-white flex items-center gap-2">{isSelected && <CheckCircle className="w-4 h-4 text-amber-500"/>} {pkg.name}</h3>
+                       <span className="font-black text-amber-400">₹{pkg.price}</span>
+                    </div>
+                    <p className="text-sm text-slate-400 mb-3">{pkg.description}</p>
+                    <div className="flex justify-between items-center text-xs font-semibold">
+                      <span className="text-slate-500">{pkg.sold_slots}/{pkg.available_slots} slots sold</span>
+                      {!isAvailable && <span className="text-red-400 bg-red-400/10 px-2 py-0.5 rounded">SOLD OUT</span>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {selectedSponsorPkg && (
+              <form onSubmit={handleSponsorSubmit} className="space-y-4 border-t border-white/10 pt-6">
+                 <h4 className="font-bold text-white">Your Company Details</h4>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <label className="text-xs font-semibold text-slate-400 mb-1 block">Company Name</label>
+                     <input type="text" required value={sponsorForm.company_name} onChange={e => setSponsorForm({...sponsorForm, company_name: e.target.value})} className="input-glass w-full" />
+                   </div>
+                   <div>
+                     <label className="text-xs font-semibold text-slate-400 mb-1 block">Contact Email</label>
+                     <input type="email" required value={sponsorForm.contact_email} onChange={e => setSponsorForm({...sponsorForm, contact_email: e.target.value})} className="input-glass w-full" />
+                   </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <label className="text-xs font-semibold text-slate-400 mb-1 block">Website URL (Optional)</label>
+                     <input type="url" value={sponsorForm.website_url} onChange={e => setSponsorForm({...sponsorForm, website_url: e.target.value})} className="input-glass w-full" />
+                   </div>
+                   <div>
+                     <label className="text-xs font-semibold text-slate-400 mb-1 block">Logo Image URL (Optional)</label>
+                     <input type="url" value={sponsorForm.logo_url} onChange={e => setSponsorForm({...sponsorForm, logo_url: e.target.value})} className="input-glass w-full" />
+                   </div>
+                 </div>
+                 <button disabled={processing} type="submit" className="w-full py-3 mt-4 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50">
+                   {processing ? "Processing..." : `Register & Pay ₹${selectedSponsorPkg.price}`}
+                 </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

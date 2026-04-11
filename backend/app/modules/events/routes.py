@@ -40,6 +40,11 @@ EVENT_PUBLIC_PROJECTION = {
     "banner_url": 1,
     "status": 1,
     "agenda": 1,
+    "demo_video_url": 1,
+    "demo_video_type": 1,
+    "demo_thumbnail_url": 1,
+    "pre_launch_discount_pct": 1,
+    "pre_launch_ends_at": 1,
     "created_at": 1,
 }
 

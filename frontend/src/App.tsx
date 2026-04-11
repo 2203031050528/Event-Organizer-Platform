@@ -24,6 +24,7 @@ import BrowseVendors from "./pages/organizer/BrowseVendors";
 import Financials from "./pages/organizer/Financials";
 import Budget from "./pages/organizer/Budget";
 import Reports from "./pages/organizer/Reports";
+import ManageSponsors from "./pages/organizer/ManageSponsors";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -207,6 +208,15 @@ const App = () => {
           element={
             <ProtectedRoute role="ORGANIZER">
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/events/:id/sponsors"
+          element={
+            <ProtectedRoute role="ORGANIZER">
+              <ManageSponsors />
             </ProtectedRoute>
           }
         />

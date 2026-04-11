@@ -33,6 +33,7 @@ from app.modules.vendors.routes import router as vendors_router
 from app.modules.financials.routes import router as financials_router
 from app.modules.budget.routes import router as budget_router
 from app.modules.reports.routes import router as reports_router
+from app.modules.sponsors.routes import router as sponsors_router
 
 # ================= BACKGROUND WORKER =================
 from app.core.booking_cleanup import cleanup_expired_bookings
@@ -113,6 +114,7 @@ app.include_router(vendors_router)
 app.include_router(financials_router)
 app.include_router(budget_router)
 app.include_router(reports_router)
+app.include_router(sponsors_router)
 
 
 # ================= CLOUDINARY =================

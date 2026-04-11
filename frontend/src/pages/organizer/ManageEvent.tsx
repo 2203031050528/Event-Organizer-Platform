@@ -111,6 +111,12 @@ export default function ManageEvent() {
             onClick={() => navigate(`/organizer/events/${id}/reports`)}
           />
           <ActionCard
+            title="Sponsors"
+            desc="Create packages and review sponsor requests"
+            icon={<Target className="w-5 h-5 text-amber-500" />} // changed target to have amber color specifically for sponsors, or use another icon
+            onClick={() => navigate(`/organizer/events/${id}/sponsors`)}
+          />
+          <ActionCard
             title="Public Page"
             desc="See how your event appears to attendees"
             icon={<Globe className="w-5 h-5" />}

@@ -68,3 +68,33 @@ def get_current_user(required_role: Optional[str] = None):
         return user
 
     return _get_user
+
+from fastapi import Request
+
+async def get_optional_user(request: Request):
+    """
+    Attempts to retrieve the current user from the Authorization header.
+    Returns the user dict if valid, or None if missing/invalid.
+    """
+    from app.core.database import db
+    
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+        
+    token = auth_header.split(" ")[1]
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id or payload.get("type") == "refresh":
+            return None
+            
+        obj_id = ObjectId(user_id)
+        user = await db.users.find_one({"_id": obj_id})
+        if not user or user.get("is_blocked"):
+            return None
+            
+        return user
+    except Exception:
+        return None
