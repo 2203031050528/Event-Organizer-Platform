@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit2, Globe, Clock, MapPin, LayoutDashboard } from "lucide-react";
+import {
+  ArrowLeft, Edit2, Globe, Clock, MapPin, LayoutDashboard,
+  DollarSign, Target, Users, ShoppingBag,
+} from "lucide-react";
 import api from "../../services/api";
 
 interface Event {
@@ -76,12 +79,36 @@ export default function ManageEvent() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <ActionCard
             title="Bookings & Sales"
             desc="View all ticket purchases and attendee details"
             icon={<LayoutDashboard className="w-5 h-5" />}
             onClick={() => navigate(`/organizer/events/${id}/bookings`)}
+          />
+          <ActionCard
+            title="Financials"
+            desc="Balance sheet · Record expenses · Export CSV"
+            icon={<DollarSign className="w-5 h-5" />}
+            onClick={() => navigate(`/organizer/events/${id}/financials`)}
+          />
+          <ActionCard
+            title="Budget"
+            desc="Plan spending · Track actuals · Alert on threshold"
+            icon={<Target className="w-5 h-5" />}
+            onClick={() => navigate(`/organizer/events/${id}/budget`)}
+          />
+          <ActionCard
+            title="Hire Vendors"
+            desc="Browse and book approved vendors for this event"
+            icon={<ShoppingBag className="w-5 h-5" />}
+            onClick={() => navigate(`/organizer/events/${id}/vendors`)}
+          />
+          <ActionCard
+            title="Attendees"
+            desc="Check-in status, survey responses, certificates"
+            icon={<Users className="w-5 h-5" />}
+            onClick={() => navigate(`/organizer/dashboard/analytics`)}
           />
           <ActionCard
             title="Public Page"

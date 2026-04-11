@@ -188,6 +188,7 @@ export default function MyEvents() {
             onToggleStatus={() => handleToggleStatus(ev)}
             onViewBookings={() => navigate(`/organizer/events/${ev.event_id}/bookings`)}
             onDuplicate={() => handleDuplicate(ev)}
+            onManage={() => navigate(`/organizer/events/${ev.event_id}`)}
           />
         ))}
       </div>
@@ -217,7 +218,7 @@ export default function MyEvents() {
 // ─── Event Card ───────────────────────────────────────────────────────────────
 
 function EventCard({
-  event, isExpanded, onToggleExpand, onEdit, onDelete, onToggleStatus, onViewBookings, onDuplicate,
+  event, isExpanded, onToggleExpand, onEdit, onDelete, onToggleStatus, onViewBookings, onDuplicate, onManage,
 }: {
   event: OrgEvent;
   isExpanded: boolean;
@@ -227,6 +228,7 @@ function EventCard({
   onToggleStatus: () => void;
   onViewBookings: () => void;
   onDuplicate: () => void;
+  onManage: () => void;
 }) {
   const cfg = STATUS_CONFIG[event.status] ?? STATUS_CONFIG.DRAFT;
   return (
@@ -251,6 +253,15 @@ function EventCard({
 
           {/* Actions */}
           <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Manage button — primary CTA */}
+            <button
+              onClick={onManage}
+              id={`manage-btn-${event.event_id}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white rounded-xl transition-colors"
+              style={{ background: 'rgba(108,71,236,0.5)', border: '1px solid rgba(108,71,236,0.6)' }}
+            >
+              Manage →
+            </button>
             {/* Publish/Unpublish toggle */}
             {event.status !== "CANCELLED" && (
               <button

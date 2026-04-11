@@ -21,6 +21,8 @@ import ManageEvent from "./pages/organizer/ManageEvent";
 import EditEvent from "./pages/organizer/EditEvent";
 import EventBookings from "./pages/organizer/EventBookings";
 import BrowseVendors from "./pages/organizer/BrowseVendors";
+import Financials from "./pages/organizer/Financials";
+import Budget from "./pages/organizer/Budget";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -171,6 +173,33 @@ const App = () => {
           }
         />
 
+        <Route
+          path="/organizer/events/:eventId/vendors"
+          element={
+            <ProtectedRoute role="ORGANIZER">
+              <BrowseVendors />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/organizer/events/:id/financials"
+          element={
+            <ProtectedRoute role="ORGANIZER">
+              <Financials />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/events/:id/budget"
+          element={
+            <ProtectedRoute role="ORGANIZER">
+              <Budget />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= ADMIN ================= */}
         <Route
