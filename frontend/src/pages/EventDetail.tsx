@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Calendar, Clock, MapPin, Users, Tag, Info, Heart, ChevronUp, ChevronDown, CheckCircle, Share2, Link2, CheckCheck, BadgePercent, X, Loader2
+  Calendar, Clock, MapPin, Users, Tag, Info, Heart, ChevronUp, ChevronDown, CheckCircle, Share2, Link2, CheckCheck, BadgePercent, X, Loader2, Video, Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { getMyWishlist, addToWishlist, removeFromWishlist } from "../services/api";
+import VideoPlayer from "../components/VideoPlayer";
 
 declare global {
   interface Window {
@@ -40,7 +41,7 @@ interface Ticket {
 }
 
 interface Event {
-  id: string;   // API returns 'id', not '_id'
+  id: string;
   title: string;
   description: string;
   category: string;
@@ -59,6 +60,13 @@ interface Event {
     description?: string;
     type: 'TALK' | 'WORKSHOP' | 'BREAK' | 'PANEL';
   }[];
+  // ── Demo Video ────────────────────────────────────
+  demo_video_url?: string;
+  demo_video_type?: 'YOUTUBE' | 'VIMEO' | 'UPLOAD';
+  demo_thumbnail_url?: string;
+  // ── Pre-Launch Discount ───────────────────────────
+  pre_launch_discount_pct?: number;
+  pre_launch_ends_at?: string;
 }
 
 export default function EventDetail() {
@@ -354,7 +362,49 @@ export default function EventDetail() {
             <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">{event.description}</p>
           </div>
 
-          {/* Agenda Section */}
+          {/* ── Demo Video Section ──────────────────────────────────── */}
+          {event.demo_video_url && event.demo_video_type && (
+            <div className="glass-card rounded-2xl p-6 animate-fade-up delay-150" style={{ animationFillMode: 'both' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Video className="w-5 h-5 text-brand-400" />
+                <h2 className="font-heading font-bold text-[var(--text-primary)] text-xl">Event Preview</h2>
+              </div>
+              <VideoPlayer
+                url={event.demo_video_url}
+                type={event.demo_video_type}
+                thumbnail={event.demo_thumbnail_url}
+                title={event.title}
+              />
+            </div>
+          )}
+
+          {/* ── Pre-Launch Discount Banner ──────────────────────────── */}
+          {event.pre_launch_discount_pct && event.pre_launch_ends_at &&
+            new Date(event.pre_launch_ends_at) > new Date() && (
+            <div
+              className="rounded-2xl p-4 flex items-center gap-4 animate-fade-up"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1))',
+                border: '1px solid rgba(245,158,11,0.35)',
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}
+              >
+                <Zap className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-amber-300 font-bold text-base">
+                  🎉 Pre-Launch Offer — {event.pre_launch_discount_pct}% OFF
+                </p>
+                <p className="text-amber-500 text-sm">
+                  Expires {new Date(event.pre_launch_ends_at).toLocaleString()} · Auto-applied at checkout
+                </p>
+              </div>
+            </div>
+          )}
+
           {event.agenda && event.agenda.length > 0 && (
             <div className="glass-card rounded-2xl p-6 animate-fade-up delay-150" style={{ animationFillMode: 'both' }}>
               <div className="flex items-center gap-2 mb-6">

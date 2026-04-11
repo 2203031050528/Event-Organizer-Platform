@@ -33,16 +33,27 @@ class EventCreate(BaseModel):
     status: str  # DRAFT | PUBLISHED
     agenda: Optional[List[AgendaItem]] = []
 
-    @field_validator("start_date", "end_date", mode="before")
+    # ── Demo Video (Feature 2) ──────────────────────────────
+    demo_video_url: Optional[str] = None          # YouTube / Vimeo / Cloudinary
+    demo_video_type: Optional[str] = None         # "YOUTUBE" | "VIMEO" | "UPLOAD"
+    demo_thumbnail_url: Optional[str] = None      # explicit thumbnail override
+
+    # ── Pre-Launch Discount (Feature 3) ────────────────────
+    pre_launch_discount_pct: Optional[float] = None   # e.g. 20  → 20% off
+    pre_launch_ends_at: Optional[datetime] = None     # cut-off datetime (UTC)
+
+    @field_validator("start_date", "end_date", "pre_launch_ends_at", mode="before")
     @classmethod
     def parse_datetime(cls, value):
+        if value is None:
+            return None
         if isinstance(value, datetime):
             return value
         if isinstance(value, str):
             try:
                 return datetime.fromisoformat(value.replace("Z", "+00:00"))
             except ValueError:
-                if len(value) == 16:  # YYYY-MM-DDTHH:MM
+                if len(value) == 16:
                     value += ":00"
                 return datetime.fromisoformat(value.replace("Z", "+00:00"))
         return value
@@ -65,7 +76,16 @@ class EventUpdate(BaseModel):
     status: Optional[str] = None
     agenda: Optional[List[AgendaItem]] = None
 
-    @field_validator("start_date", "end_date", mode="before")
+    # ── Demo Video ──────────────────────────────────────────
+    demo_video_url: Optional[str] = None
+    demo_video_type: Optional[str] = None
+    demo_thumbnail_url: Optional[str] = None
+
+    # ── Pre-Launch Discount ─────────────────────────────────
+    pre_launch_discount_pct: Optional[float] = None
+    pre_launch_ends_at: Optional[datetime] = None
+
+    @field_validator("start_date", "end_date", "pre_launch_ends_at", mode="before")
     @classmethod
     def parse_datetime(cls, value):
         if value is None:
@@ -107,6 +127,15 @@ class EventOut(BaseModel):
     status: str
     agenda: Optional[List[AgendaItem]] = []
     created_at: datetime
+
+    # ── Demo Video ──────────────────────────────────────────
+    demo_video_url: Optional[str] = None
+    demo_video_type: Optional[str] = None
+    demo_thumbnail_url: Optional[str] = None
+
+    # ── Pre-Launch Discount ─────────────────────────────────
+    pre_launch_discount_pct: Optional[float] = None
+    pre_launch_ends_at: Optional[datetime] = None
 
 
 class EventTicketOut(BaseModel):

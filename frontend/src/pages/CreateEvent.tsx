@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import {
   FileText, MapPin, Ticket, Image, ChevronRight, ChevronLeft,
-  Loader2, Upload, Check,
+  Loader2, Upload, Check, Video, Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -28,6 +28,13 @@ interface CreateEventPayload {
   end_date: string;
   banner_url: string;
   status: EventStatus;
+  // Demo Video
+  demo_video_url?: string;
+  demo_video_type?: string;
+  demo_thumbnail_url?: string;
+  // Pre-launch discount
+  pre_launch_discount_pct?: number | null;
+  pre_launch_ends_at?: string;
 }
 
 interface CreateTicketPayload {
@@ -50,6 +57,7 @@ const STEPS = [
   { label: "Location", icon: MapPin, color: "rgba(59,130,246,0.2)", border: "rgba(59,130,246,0.3)", text: "#93c5fd" },
   { label: "Tickets", icon: Ticket, color: "rgba(16,185,129,0.2)", border: "rgba(16,185,129,0.3)", text: "#6ee7b7" },
   { label: "Banner", icon: Image, color: "rgba(245,158,11,0.2)", border: "rgba(245,158,11,0.3)", text: "#fcd34d" },
+  { label: "Video", icon: Video, color: "rgba(236,72,153,0.2)", border: "rgba(236,72,153,0.3)", text: "#f9a8d4" },
 ];
 
 /* ═══════════════════ MAIN COMPONENT ═══════════════════ */
@@ -77,6 +85,13 @@ export default function CreateEvent() {
     online_link: "",
     start_date: "",
     end_date: "",
+    // video
+    demo_video_url: "",
+    demo_video_type: "",
+    demo_thumbnail_url: "",
+    // pre-launch
+    pre_launch_discount_pct: null,
+    pre_launch_ends_at: "",
   });
 
   const [ticket, setTicket] = useState<Omit<CreateTicketPayload, "event_id">>({
@@ -102,6 +117,7 @@ export default function CreateEvent() {
       return true;
     }
     if (step === 4) return !!image;
+    if (step === 5) return true; // Video step is optional
     return true;
   }, [step, eventData, ticket, isFree, image]);
 
@@ -125,7 +141,30 @@ export default function CreateEvent() {
     try {
       setLoading(true);
       const banner_url = await uploadImage();
-      const eventRes = await createEvent({ ...eventData, banner_url, status: "PUBLISHED" });
+
+      // Detect video type from URL
+      let demo_video_type = eventData.demo_video_type || "";
+      if (eventData.demo_video_url && !demo_video_type) {
+        if (eventData.demo_video_url.includes("youtube.com") || eventData.demo_video_url.includes("youtu.be"))
+          demo_video_type = "YOUTUBE";
+        else if (eventData.demo_video_url.includes("vimeo.com"))
+          demo_video_type = "VIMEO";
+        else if (eventData.demo_video_url)
+          demo_video_type = "UPLOAD";
+      }
+
+      const payload: CreateEventPayload = {
+        ...eventData,
+        banner_url,
+        status: "PUBLISHED",
+        demo_video_type: demo_video_type || undefined,
+        demo_video_url: eventData.demo_video_url || undefined,
+        demo_thumbnail_url: eventData.demo_thumbnail_url || undefined,
+        pre_launch_discount_pct: eventData.pre_launch_discount_pct || undefined,
+        pre_launch_ends_at: eventData.pre_launch_ends_at || undefined,
+      };
+
+      const eventRes = await createEvent(payload);
       await createTicket({ event_id: eventRes.data.event_id, ...ticket, price: isFree ? 0 : ticket.price });
       toast.success("Event created successfully!");
       navigate(`/event/${eventRes.data.event_id}`);
@@ -381,6 +420,61 @@ export default function CreateEvent() {
                 </label>
               </div>
             )}
+
+            {/* ─── STEP 5: Video & Pre-Launch Discount ─── */}
+            {step === 5 && (
+              <>
+                <Field label="Demo Video URL" hint="YouTube, Vimeo, or direct video URL (optional)">
+                  <input
+                    className="input-glass w-full text-sm py-3"
+                    placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                    value={eventData.demo_video_url || ""}
+                    onChange={(e) => setEventData({ ...eventData, demo_video_url: e.target.value })}
+                  />
+                </Field>
+
+                <Field label="Custom Thumbnail URL" hint="Override the auto-detected thumbnail (optional)">
+                  <input
+                    className="input-glass w-full text-sm py-3"
+                    placeholder="https://cdn.example.com/thumb.jpg"
+                    value={eventData.demo_thumbnail_url || ""}
+                    onChange={(e) => setEventData({ ...eventData, demo_thumbnail_url: e.target.value })}
+                  />
+                </Field>
+
+                <div
+                  className="mt-2 p-4 rounded-xl"
+                  style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Pre-Launch Discount (optional)</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Discount %" hint="e.g. 20 for 20% off">
+                      <input
+                        type="number" min={0} max={100}
+                        className="input-glass w-full text-sm py-3"
+                        placeholder="0"
+                        value={eventData.pre_launch_discount_pct ?? ""}
+                        onChange={(e) => setEventData({
+                          ...eventData,
+                          pre_launch_discount_pct: e.target.value ? Number(e.target.value) : null
+                        })}
+                      />
+                    </Field>
+                    <Field label="Offer Expires At" hint="Auto-apply ends when time is reached">
+                      <input
+                        type="datetime-local"
+                        className="input-glass w-full text-sm py-3"
+                        value={eventData.pre_launch_ends_at || ""}
+                        onChange={(e) => setEventData({ ...eventData, pre_launch_ends_at: e.target.value })}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -394,7 +488,7 @@ export default function CreateEvent() {
             </button>
           ) : <div />}
 
-          {step < 4 ? (
+          {step < 5 ? (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canGoNext}

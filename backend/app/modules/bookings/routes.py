@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from bson import ObjectId
+from pydantic import BaseModel
+from typing import Optional, List
 from datetime import datetime, timedelta
 from app.core.database import db
 from app.modules.bookings.models import Booking
 from app.common.utils.dependencies import get_current_user
+from app.modules.discount_engine.engine import DiscountContext, total_discount
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
@@ -66,41 +69,36 @@ async def create_booking(
                 "price": item_price
             })
 
-    discount_applied = 0
-    discount_info = None
-
     # ------------------------------------------
-    # APPLY DISCOUNT
+    # DISCOUNT ENGINE (combinable)
     # ------------------------------------------
-    if data.discount_code:
-        code_upper = data.discount_code.strip().upper()
-        discount_doc = await db.discount_codes.find_one({"code": code_upper})
+    ctx = DiscountContext(
+        event_id=str(event["_id"]),
+        ticket_id=data.ticket_id,
+        user_id=str(current_user["_id"]),
+        quantity=data.quantity,
+        subtotal=total,   # total at this point = tickets + addons
+        promo_code=data.discount_code,
+        user=current_user,
+        event=event,
+        ticket=ticket,
+    )
+    discount_applied, applied_discounts = await total_discount(ctx, db)
 
-        if discount_doc:
-            now = datetime.utcnow()
-            is_expired = discount_doc.get("expires_at") and discount_doc["expires_at"] < now
-            is_exhausted = discount_doc.get("usage_limit") and discount_doc.get("used_count", 0) >= discount_doc["usage_limit"]
-            wrong_event = discount_doc.get("event_id") and str(discount_doc["event_id"]) != str(event["_id"])
+    total = max(0, total - discount_applied)
 
-            if not is_expired and not is_exhausted and not wrong_event:
-                if discount_doc["type"] == "PERCENTAGE":
-                    discount_applied = round(total * discount_doc["value"] / 100, 2)
-                else:
-                    discount_applied = min(discount_doc["value"], total)
+    # Increment used_count for promo codes that were applied
+    for d in applied_discounts:
+        if d.code:
+            await db.discount_codes.update_one(
+                {"code": d.code.upper()},
+                {"$inc": {"used_count": 1}}
+            )
 
-                total = max(0, total - discount_applied)
-
-                discount_info = {
-                    "code": code_upper,
-                    "type": discount_doc["type"],
-                    "value": discount_doc["value"],
-                    "discount_applied": discount_applied,
-                }
-
-                await db.discount_codes.update_one(
-                    {"code": code_upper},
-                    {"$inc": {"used_count": 1}}
-                )
+    discount_info = [
+        {"type": d.discount_type, "label": d.label, "amount": d.value, "code": d.code}
+        for d in applied_discounts
+    ] if applied_discounts else []
 
     # ------------------------------------------
     # ATOMIC TICKET RESERVATION

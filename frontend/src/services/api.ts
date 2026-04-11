@@ -384,3 +384,24 @@ export const getPublicStats = async () => {
   const res = await api.get('/users/stats');
   return res.data;
 };
+
+// ================= DISCOUNT ENGINE =================
+export const evaluateDiscounts = async (payload: {
+  event_id: string;
+  ticket_id: string;
+  quantity: number;
+  promo_code?: string;
+}) => {
+  const res = await api.post('/discounts/engine/evaluate', payload);
+  return res.data as {
+    subtotal: number;
+    total_discount: number;
+    final_price: number;
+    discounts: Array<{
+      type: string;
+      label: string;
+      amount: number;
+      code: string | null;
+    }>;
+  };
+};
