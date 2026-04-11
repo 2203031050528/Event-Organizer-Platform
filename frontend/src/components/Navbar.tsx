@@ -10,6 +10,7 @@ const POPULAR_CITIES = ["Pune", "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ch
 const ROLE_BADGE: Record<string, { label: string; color: string }> = {
   ADMIN: { label: "Admin", color: "bg-red-500/20 text-red-400 border-red-500/30" },
   ORGANIZER: { label: "Organizer", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
+  VENDOR: { label: "Partner", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
   USER: { label: "User", color: "bg-brand-500/20 text-brand-300 border-brand-500/30" },
 };
 
@@ -230,6 +231,15 @@ export default function Navbar() {
                           </>
                         )}
 
+                        {/* VENDOR links */}
+                        {user.role === "VENDOR" && (
+                          <>
+                            <NavLink to="/vendor/dashboard" onClick={() => setShowProfileDropdown(false)}>
+                              <LayoutDashboard className="w-4 h-4 text-slate-400" />Vendor Dashboard
+                            </NavLink>
+                          </>
+                        )}
+
                         {/* ADMIN links */}
                         {user.role === "ADMIN" && (
                           <>
@@ -262,6 +272,12 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center gap-3">
                 <ThemeToggle />
+                <Link
+                  to="/vendor/register"
+                  className="hidden md:flex text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium px-2"
+                >
+                  Become a Vendor
+                </Link>
                 <Link
                   to="/login"
                   className="btn-primary text-sm px-5 py-2.5"
@@ -394,6 +410,11 @@ export default function Navbar() {
                     <NavLink to="/wishlist" onClick={closeMobile}><Heart className="w-4 h-4 text-slate-400" />My Wishlist</NavLink>
                   </>
                 )}
+                {user.role === "VENDOR" && (
+                  <>
+                    <NavLink to="/vendor/dashboard" onClick={closeMobile}><LayoutDashboard className="w-4 h-4 text-slate-400" />Vendor Dashboard</NavLink>
+                  </>
+                )}
                 {user.role === "ADMIN" && (
                   <>
                     <NavLink to="/admin" onClick={closeMobile}><Settings className="w-4 h-4 text-slate-400" />Admin Panel</NavLink>
@@ -412,13 +433,22 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                onClick={closeMobile}
-                className="btn-primary w-full justify-center mt-4"
-              >
-                Sign In
-              </Link>
+              <>
+                <Link
+                  to="/vendor/register"
+                  onClick={closeMobile}
+                  className="block text-center text-sm font-medium text-brand-300 border border-brand-500/30 bg-brand-500/10 rounded-xl py-2.5 mt-4"
+                >
+                  Become a Vendor
+                </Link>
+                <Link
+                  to="/login"
+                  onClick={closeMobile}
+                  className="btn-primary w-full justify-center mt-3"
+                >
+                  Sign In
+                </Link>
+              </>
             )}
           </div>
         </div>

@@ -7,6 +7,8 @@ import EventDetail from "./pages/EventDetail";
 import Login from "./pages/Login";
 import CreateEvent from "./pages/CreateEvent";
 import ApplyOrganizer from "./pages/ApplyOrganizer";
+import VendorRegister from "./pages/VendorRegister";
+import VendorDashboard from "./pages/VendorDashboard";
 
 import UserProfile from "./pages/UserProfile";
 import MyBookings from "./pages/MyBookings";
@@ -18,6 +20,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import ManageEvent from "./pages/organizer/ManageEvent";
 import EditEvent from "./pages/organizer/EditEvent";
 import EventBookings from "./pages/organizer/EventBookings";
+import BrowseVendors from "./pages/organizer/BrowseVendors";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -107,6 +110,17 @@ const App = () => {
         </Route>
 
         <Route path="/apply-organizer" element={<ApplyOrganizer />} />
+        <Route path="/vendor/register" element={<VendorRegister />} />
+
+        {/* ================= VENDOR ================= */}
+        <Route
+          path="/vendor/dashboard"
+          element={
+            <ProtectedRoute role="VENDOR">
+              <VendorDashboard />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= PUBLIC CERT VERIFY ================= */}
         <Route path="/verify-certificate/:id" element={<VerifyCertificate />} />

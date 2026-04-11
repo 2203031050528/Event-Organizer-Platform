@@ -3,6 +3,7 @@ import AdminLayout from "./AdminLayout";
 import AdminEvents from "./Events";
 import Organizers from "./Organizers";
 import UsersList from "./UsersList";
+import AdminVendors from "./Vendors";
 import Analytics from "./Analytics";
 
 function AdminDashboard() {
@@ -16,6 +17,8 @@ function AdminDashboard() {
         return <Organizers />;
       case "users":
         return <UsersList />;
+      case "vendors":
+        return <AdminVendors />;
       case "analytics":
         return <Analytics />;
       default:

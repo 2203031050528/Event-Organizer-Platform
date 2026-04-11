@@ -6,7 +6,7 @@ const ProtectedRoute = ({
   role,
 }: {
   children: JSX.Element;
-  role?: "ADMIN" | "USER" | "ORGANIZER";
+  role?: "ADMIN" | "USER" | "ORGANIZER" | "VENDOR";
 }) => {
   const { user } = useAuth();
 

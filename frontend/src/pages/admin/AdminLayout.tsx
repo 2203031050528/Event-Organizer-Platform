@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { key: "events", label: "Events", icon: CalendarDays },
   { key: "organizers", label: "Organizers", icon: UserCog },
   { key: "users", label: "Users", icon: Users },
+  { key: "vendors", label: "Vendors", icon: ShieldCheck },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
@@ -22,6 +23,7 @@ const SECTION_META: Record<string, { title: string; subtitle: string }> = {
   events: { title: "Events", subtitle: "Review, publish, and manage all events." },
   organizers: { title: "Organizers", subtitle: "Verify applications and manage organizers." },
   users: { title: "Users", subtitle: "View and control user access and roles." },
+  vendors: { title: "Vendors", subtitle: "Review vendor KYC submissions." },
   analytics: { title: "Analytics", subtitle: "Track performance, revenue, and engagement." },
   default: { title: "Dashboard", subtitle: "Overview of your admin tools." },
 };

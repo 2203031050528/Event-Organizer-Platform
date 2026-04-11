@@ -29,6 +29,7 @@ from app.modules.reviews.routes import router as surveys_router
 from app.modules.certificates.routes import router as certificate_router
 from app.modules.discount_engine.routes import router as discount_engine_router
 from app.modules.transport.routes import router as transport_router
+from app.modules.vendors.routes import router as vendors_router
 
 # ================= BACKGROUND WORKER =================
 from app.core.booking_cleanup import cleanup_expired_bookings
@@ -105,6 +106,7 @@ app.include_router(surveys_router)
 app.include_router(certificate_router)
 app.include_router(discount_engine_router)
 app.include_router(transport_router)
+app.include_router(vendors_router)
 
 
 # ================= CLOUDINARY =================

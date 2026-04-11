@@ -140,6 +140,13 @@ const OrganizerLayout = ({ children, activeSection, onSelectSection }: Props) =>
             Quick Links
           </p>
           <button
+            onClick={() => handleSectionClick('vendors')}
+            className={`sidebar-item w-full text-left ${activeSection === 'vendors' ? 'active' : ''}`}
+          >
+            <span className="text-sm leading-none flex-shrink-0 w-4 text-center">🤝</span>
+            Hire Vendors
+          </button>
+          <button
             onClick={() => { navigate("/my-bookings"); setOpen(false); }}
             className="sidebar-item w-full text-left"
           >

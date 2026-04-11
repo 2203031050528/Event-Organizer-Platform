@@ -13,11 +13,12 @@ import Agenda from "./organizer/Agenda";
 import Addons from "./organizer/Addons";
 import Survey from "./organizer/Survey";
 import Certificates from "./organizer/Certificates";
+import BrowseVendors from "./organizer/BrowseVendors";
 
 const VALID_SECTIONS = [
   "overview", "events", "attendees", "profile",
   "tickets", "discounts", "addons",
-  "email-blast", "agenda", "survey", "certificates",
+  "email-blast", "agenda", "survey", "certificates", "vendors"
 ];
 
 const OrganizerDashboard = () => {
@@ -53,6 +54,7 @@ const OrganizerDashboard = () => {
       case "agenda": return <Agenda />;
       case "survey": return <Survey />;
       case "certificates": return <Certificates />;
+      case "vendors": return <BrowseVendors />;
       default: return <Overview />;
     }
   };

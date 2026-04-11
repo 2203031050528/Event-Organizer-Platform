@@ -86,7 +86,8 @@ async def login_user(
     )
 
     user = await db.users.find_one({"email": email})
-    if not user or not verify_password(password, user["password"]):
+    stored_password = user.get("password") or user.get("hashed_password") if user else None
+    if not user or not stored_password or not verify_password(password, stored_password):
         raise auth_error
 
     if user.get("is_blocked"):
