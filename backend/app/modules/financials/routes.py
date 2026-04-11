@@ -53,10 +53,14 @@ async def _get_organizer_event(event_id: str, organizer_user_id: ObjectId):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # Find organizer record
-    organizer = await db.organizers.find_one({"user_id": organizer_user_id})
-    if not organizer or str(event.get("organizer_id")) != str(organizer["_id"]):
+    # The event's organizer_id corresponds to the user's _id
+    if str(event.get("organizer_id")) != str(organizer_user_id):
         raise HTTPException(status_code=403, detail="Not your event")
+
+    # Find the actual organizer record for linking to new docs
+    organizer = await db.organizers.find_one({"user_id": organizer_user_id})
+    if not organizer:
+        raise HTTPException(status_code=403, detail="Not registered as organizer")
 
     return event, organizer
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Edit2, Globe, Clock, MapPin, LayoutDashboard,
-  DollarSign, Target, Users, ShoppingBag,
+  DollarSign, Target, BarChart3, ShoppingBag,
 } from "lucide-react";
 import api from "../../services/api";
 
@@ -105,17 +105,16 @@ export default function ManageEvent() {
             onClick={() => navigate(`/organizer/events/${id}/vendors`)}
           />
           <ActionCard
-            title="Attendees"
-            desc="Check-in status, survey responses, certificates"
-            icon={<Users className="w-5 h-5" />}
-            onClick={() => navigate(`/organizer/dashboard/analytics`)}
+            title="Reports"
+            desc="Attendance, revenue, vendor & engagement analytics"
+            icon={<BarChart3 className="w-5 h-5" />}
+            onClick={() => navigate(`/organizer/events/${id}/reports`)}
           />
           <ActionCard
             title="Public Page"
             desc="See how your event appears to attendees"
             icon={<Globe className="w-5 h-5" />}
             onClick={() => navigate(`/event/${id}`)}
-            variant="ghost"
           />
         </div>
       </div>

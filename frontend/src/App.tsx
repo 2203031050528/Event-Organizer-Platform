@@ -23,6 +23,7 @@ import EventBookings from "./pages/organizer/EventBookings";
 import BrowseVendors from "./pages/organizer/BrowseVendors";
 import Financials from "./pages/organizer/Financials";
 import Budget from "./pages/organizer/Budget";
+import Reports from "./pages/organizer/Reports";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -197,6 +198,15 @@ const App = () => {
           element={
             <ProtectedRoute role="ORGANIZER">
               <Budget />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/events/:id/reports"
+          element={
+            <ProtectedRoute role="ORGANIZER">
+              <Reports />
             </ProtectedRoute>
           }
         />

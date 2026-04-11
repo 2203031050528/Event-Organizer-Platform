@@ -46,9 +46,12 @@ async def _get_organizer_for_event(event_id: str, user_id: ObjectId):
     event = await db.events.find_one({"_id": ObjectId(event_id)})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
-    organizer = await db.organizers.find_one({"user_id": user_id})
-    if not organizer or str(event.get("organizer_id")) != str(organizer["_id"]):
+    if str(event.get("organizer_id")) != str(user_id):
         raise HTTPException(status_code=403, detail="Not your event")
+
+    organizer = await db.organizers.find_one({"user_id": user_id})
+    if not organizer:
+        raise HTTPException(status_code=403, detail="Not registered as organizer")
     return organizer
 
 
