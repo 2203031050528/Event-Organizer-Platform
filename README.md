@@ -10,15 +10,24 @@ A high-performance, full-scale **Online Event Management Platform** inspired by 
 - **Discovery**: Search and filter events by city, category, date, and price.
 - **Dynamic Search**: High-performance hero search with real-time suggestions.
 - **Easy Booking**: Seamless multi-step checkout with coupon support and automatic pricing.
+- **Transport & Logistics**: Select and book event transportation during the registration process.
 - **E-Tickets**: Receive QR-coded tickets via email (PDF) with the ability to download from the profile.
 - **Verification**: Built-in QR scanner for organizers to check in attendees at the venue.
 - **Wishlist & Reviews**: Save favorite events and leave feedback after the event.
+
+### 🤝 Vendors & Sponsors
+- **Vendor Dashboard**: Dedicated portals for vendors to register, manage services, and receive bookings from organizers.
+- **Sponsorship Portal**: Streamlined application process for brands to sponsor events and track their visibility.
 
 ### 🏢 Organizers (Premium Dashboard)
 - **Glassmorphic UI**: Sleek, modern dashboard with dark theme and interactive analytics.
 - **Event Lifecycle**: Create, edit, publish, or cancel events with banner uploads via Cloudinary.
 - **Ticket Management**: Define multiple ticket tiers (General, VIP, etc.) with custom pricing and quantity limits.
-- **Sales Tracking**: Real-time overview of ticket sales, revenue, and attendee lists.
+- **Sales Tracking & Reports**: Real-time overview of ticket sales, revenue, and attendee lists with detailed analytics.
+- **Budget & Financials**: Comprehensive budget tracking, expense management, and financial reporting.
+- **Sponsor & Vendor Management**: Manage sponsor applications, track sponsorships, and discover/book vendors for your events.
+- **Discounts & Add-ons**: Create custom discount codes (coupons) and sell event add-ons/merchandise.
+- **Forms & Surveys**: Build custom registration forms and post-event surveys to gather attendee feedback.
 - **Certificate Distribution**: Automatically generate and distribute branded PDF certificates with QR verification for participants, speakers, and volunteers.
 - **Communication**: Email Blast system to send bulk updates or announcements to all registered attendees.
 - **Agenda Manager**: Build and manage detailed event schedules and sessions.
@@ -30,7 +39,7 @@ A high-performance, full-scale **Online Event Management Platform** inspired by 
 
 ---
 
-## �️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **Framework**: React 18 (Vite) with TypeScript
@@ -121,6 +130,11 @@ Event-Organizer-Platform/
 - [x] QR Code Check-in System
 - [x] Certificate Distribution System
 - [x] Email Blast & Agenda Tools
+- [x] Budget & Financials Tracking
+- [x] Sponsor & Vendor Management System
+- [x] Discount Engine & Add-ons
+- [x] Transport & Logistics Integration
+- [x] Custom Forms & Surveys
 - [ ] Mobile App Integration (Planned)
 - [ ] AI-based Event Recommendations (Planned)
 

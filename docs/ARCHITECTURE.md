@@ -1,4 +1,4 @@
-# Architecture Overview
+`# Architecture Overview
 
 The **Event Organizer Platform** is built with a modern, decoupled architecture to ensure scalability and ease of maintenance.
 
@@ -66,3 +66,4 @@ The backend is structured into domain-driven modules:
 
 ---
 **This architecture ensures the platform can handle thousands of concurrent bookings and registrations effortlessly.**
+`
